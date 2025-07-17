@@ -6,7 +6,7 @@ import { NetworkStackProps } from './types';
 
 export class NetworkStack extends cdk.Stack {
   public readonly vpc:Vpc
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: NetworkStackProps) {
     super(scope, id, props);
 
     // The code that defines your stack goes here
@@ -17,10 +17,11 @@ export class NetworkStack extends cdk.Stack {
     // });
 
     this.vpc = new Vpc(this, `${id}_VPC`, {
-      //ipAddresses: IpAddresses.cidr('10.0.0.0/16'),
-      cidr: '192.168.0.0/16',
-      maxAzs: 2,
-      natGateways: 1,
+      ipAddresses: IpAddresses.cidr(props?.Vpc.ipAddresses!),
+      //cidr: '192.168.0.0/16',
+      //maxAzs: 2,
+      maxAzs: props?.Vpc.maxAzs!,
+      //natGateways: 1,
       subnetConfiguration: [
         {
           name: "PublicSubnet",

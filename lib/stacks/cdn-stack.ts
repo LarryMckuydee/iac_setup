@@ -3,13 +3,14 @@ import { Construct } from 'constructs';
 import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Distribution, CfnOriginAccessControl, CfnDistribution } from 'aws-cdk-lib/aws-cloudfront';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { CdnStackProps } from './types';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class CdnStack extends cdk.Stack {
   public readonly s3: Bucket
   public readonly cloudfront: Distribution | CfnDistribution
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: CdnStackProps) {
     super(scope, id, props);
 
     // The code that defines your stack goes here
@@ -43,6 +44,7 @@ export class CdnStack extends cdk.Stack {
 
     //  }
     //})
+    
     this.cloudfront = new CfnDistribution(this, `${id}_Cloudfront_Distribution`, {
       distributionConfig: {
         enabled: true,
@@ -56,6 +58,14 @@ export class CdnStack extends cdk.Stack {
             domainName: this.s3.bucketDomainName,
             s3OriginConfig: {},
             originAccessControlId: oac.attrId
+          },
+          {
+            id: "nlborigin",
+            domainName: props?.nlb.loadBalancerDnsName!,
+            customOriginConfig: {
+              originProtocolPolicy: 'HTTP',
+              httpPort: 80
+            }
           }
         ]
       }
