@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
-import { Distribution, CfnOriginAccessControl, CfnDistribution, CachePolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { Distribution, CfnOriginAccessControl, CfnDistribution, CachePolicy, OriginRequestPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { CdnStackProps } from './types';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
@@ -55,6 +55,16 @@ export class CdnStack extends cdk.Stack {
           allowedMethods: ['GET', 'HEAD'],
           cachePolicyId: CachePolicy.CACHING_OPTIMIZED.cachePolicyId
         },
+        cacheBehaviors: [
+          {
+            pathPattern: "/api/*",
+            targetOriginId: "nlborigin",
+            viewerProtocolPolicy: "allow-all",
+            allowedMethods: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+            cachePolicyId: CachePolicy.CACHING_DISABLED.cachePolicyId,
+            originRequestPolicyId: OriginRequestPolicy.ALL_VIEWER.originRequestPolicyId
+          }
+        ],
         origins: [
           {
             id: this.s3.bucketArn,
