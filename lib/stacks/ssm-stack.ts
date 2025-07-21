@@ -33,10 +33,7 @@ export class SsmStack extends cdk.Stack {
     // Create EC2
     const vpc = props?.vpc!
     const ec2InstaceType = InstanceType.of(InstanceClass.BURSTABLE3, InstanceSize.MICRO)
-    const subnets = vpc.selectSubnets({
-      subnetType: SubnetType.PUBLIC
-    }).subnets
-
+    const subnet = props?.subnet!
     this.ssmInstance = new Instance(this, `${id}_SSM_Instance`, {
       vpc,
       instanceType: ec2InstaceType,
@@ -44,7 +41,7 @@ export class SsmStack extends cdk.Stack {
       role: this.role,
       vpcSubnets: {
         subnets: [
-          subnets[0]
+          subnet
         ]
       }
     })

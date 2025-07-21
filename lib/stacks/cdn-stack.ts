@@ -1,9 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
-import { Distribution, CfnOriginAccessControl, CfnDistribution } from 'aws-cdk-lib/aws-cloudfront';
+import { Distribution, CfnOriginAccessControl, CfnDistribution, CachePolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { CdnStackProps } from './types';
+import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class CdnStack extends cdk.Stack {
@@ -50,7 +51,9 @@ export class CdnStack extends cdk.Stack {
         enabled: true,
         defaultCacheBehavior: {
           targetOriginId: this.s3.bucketArn,
-          viewerProtocolPolicy: 'allow-all'
+          viewerProtocolPolicy: 'allow-all',
+          allowedMethods: ['GET', 'HEAD'],
+          cachePolicyId: CachePolicy.CACHING_OPTIMIZED.cachePolicyId
         },
         origins: [
           {
@@ -63,12 +66,28 @@ export class CdnStack extends cdk.Stack {
             id: "nlborigin",
             domainName: props?.nlb.loadBalancerDnsName!,
             customOriginConfig: {
-              originProtocolPolicy: 'HTTP',
+              originProtocolPolicy: 'http-only',
               httpPort: 80
             }
           }
         ]
       }
     })
+
+    this.s3.addToResourcePolicy(new PolicyStatement({
+      effect: Effect.ALLOW,
+      principals: [
+        new ServicePrincipal('cloudfront.amazonaws.com')
+      ],
+      actions: ['s3:GetObject'],
+      resources: [
+        `${this.s3.bucketArn}/*`
+      ],
+      conditions: {
+        StringEquals: {
+          'AWS:SourceArn': `arn:aws:cloudfront::${cdk.Stack.of(this).account}:distribution/${this.cloudfront.ref}`
+        }
+      }
+    }))
   }
 }

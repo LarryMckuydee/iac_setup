@@ -27,7 +27,7 @@ export class DatabaseStack extends cdk.Stack {
     })
     this.sg.addIngressRule(props?.ec2Sg!, Port.tcp(3306))
 
-    const instanceType = InstanceType.of(InstanceClass.BURSTABLE3, InstanceSize.LARGE)
+    const instanceType = InstanceType.of(InstanceClass.BURSTABLE3, InstanceSize.MEDIUM)
 
     this.master = new DatabaseInstance(this, `${id}_Master_Database`, {
       engine: DatabaseInstanceEngine.mariaDb({
@@ -36,7 +36,7 @@ export class DatabaseStack extends cdk.Stack {
       instanceType,
       vpc: this.vpc,
       vpcSubnets: {
-        subnets: [props?.masterSubnet!]
+        subnets: [props?.masterSubnet!, props?.replicaSubnet!]
       },
       securityGroups: [
         this.sg
@@ -48,7 +48,7 @@ export class DatabaseStack extends cdk.Stack {
       vpc: this.vpc,
       instanceType,
       vpcSubnets: {
-        subnets: [props?.replicaSubnet!]
+        subnets: [props?.replicaSubnet!, props?.masterSubnet!]
       }
     })
   }
