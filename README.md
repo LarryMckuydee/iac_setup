@@ -15,7 +15,7 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 ## Sample SSM Port Forward Command
 ```
-aws ssm start-session --target <instance-id> --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters '{"host": ["mbbdatabasestack-mbbdatabasestackmasterdatabase5d3-4tyoxdfx71jc.cneow02o6yyx.ap-southeast-1.rds.amazonaws.com"], "portNumber":["3306"],"localPortNumber":["3306"]}'
+aws ssm start-session --target <instance-id> --document-name AWS-StartPortForwardingSessionToRemoteHost --parameters '{"host": ["databasestack-databasestackmasterdatabase5d3-4tyoxdfx71jc.cneow02o6yyx.ap-southeast-1.rds.amazonaws.com"], "portNumber":["3306"],"localPortNumber":["3306"]}'
 ```
 MariaDB: 3306
 localPortNumber: 3306
